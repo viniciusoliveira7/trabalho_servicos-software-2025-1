@@ -5,7 +5,9 @@ import json
 # Comentário para atualização do repositório
 def envia(json_text):
     objeto_json = json.loads(json_text)
-    return objeto_json
+    url ="http://backend-json:8080/json/"
+    r = requests.post(url, json=objeto_json)
+    return r.content
 
 demo = gr.Interface(fn=envia, inputs="text",outputs="text")
 

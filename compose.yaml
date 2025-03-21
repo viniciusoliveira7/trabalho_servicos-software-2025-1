@@ -17,6 +17,15 @@ services:
     volumes:
       - /work
 
+  gradio-image:
+    build:
+      context: gradio-image
+      dockerfile: Dockerfile 
+    ports:
+      - 7861:7860
+    volumes:
+      - /work
+
   backend-json:
     build:
       context: backend-json
