@@ -11,8 +11,7 @@ COPY ./requirements.txt /images/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /images/requirements.txt 
 
-RUN python3 -m pip install tf-nightly
-RUN python3 -m pip install keras
+RUN python3 -m pip azure-ai-vision-imageanalysis
 
 EXPOSE 9001
 

@@ -2,6 +2,7 @@ fastapi
 pydantic
 gunicorn
 uvicorn
-python-multipart
-numpy
-pillow
+azure-ai-vision
+azure-core
+requests
+openai
