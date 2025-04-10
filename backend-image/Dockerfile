@@ -11,8 +11,6 @@ COPY ./requirements.txt /images/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /images/requirements.txt 
 
-RUN python3 -m pip azure-ai-vision-imageanalysis
-
 EXPOSE 9001
 
 CMD gunicorn --bind 0.0.0.0:9001 --workers 1 --timeout 0 images.webservice:app -k uvicorn.workers.UvicornWorker

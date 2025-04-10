@@ -16,6 +16,8 @@ services:
       - 7862:7860
     volumes:
       - /work
+    networks:
+      - app-network
 
   backend-image:
     build:
@@ -25,3 +27,11 @@ services:
       - 8081:9001
     volumes:
       - /code
+    env_file:
+      - ./backend-image/Credentials.env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

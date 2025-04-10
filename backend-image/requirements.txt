@@ -2,7 +2,7 @@ fastapi
 pydantic
 gunicorn
 uvicorn
-azure-ai-vision
 azure-core
 requests
 openai
+python-dotenv

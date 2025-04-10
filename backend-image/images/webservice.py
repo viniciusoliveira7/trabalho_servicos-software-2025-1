@@ -1,14 +1,11 @@
 import requests
 import json
 from openai import AzureOpenAI
-from azure.ai.vision.imageanalysis import ImageAnalysisClient
-from azure.ai.vision.imageanalysis.models import VisualFeatures
-from azure.core.credentials import AzureKeyCredential
 import os
 from os import path
 from fastapi import FastAPI, applications
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
@@ -36,7 +33,7 @@ if path.exists(assets_path + "/swagger-ui.css") and path.exists(assets_path + "/
 async def index():
     return "/docs"
 
-async def traduzir_texto(texto, idioma_destino="pt"):
+def traduzir_texto(texto, idioma_destino="pt"):
     translator_endpoint = os.getenv("TRANSLATOR_ENDPOINT")
     translator_key = os.getenv("TRANSLATOR_KEY")
     translator_location = os.getenv("TRANSLATOR_LOCATION")
@@ -66,44 +63,51 @@ async def gerar_imagem(prompt_texto):
   result = client.images.generate(
       model="dall-e-3",
       prompt=prompt_texto,
+      quality="hd",
       n=1)
 
   imagem_gerada = json.loads(result.model_dump_json())['data'][0]['url']
 
-  resultado_analise = analisar_imagem(imagem_gerada)
+  #resultado_analise = await analisar_imagem(imagem_gerada)
 
-  return resultado_analise
+  #return resultado_analise
 
-
-async def analisar_imagem(imagem_url):
-  computer_vision_endpoint = os.getenv("COMPUTER_VISION_ENDPOINT")
-  computer_vision_key = os.getenv("COMPUTER_VISION_KEY")
-
-  # Criar um cliente de Análise de Imagem
-  client = ImageAnalysisClient(endpoint=computer_vision_endpoint, credential=AzureKeyCredential(computer_vision_key))
-
-  # Obter uma análise completa da imagem
-  result = client.analyze_from_url(
-      image_url=imagem_url,
-      visual_features=[VisualFeatures.TAGS, VisualFeatures.OBJECTS],
-      gender_neutral_caption=True)
-
-  # Processar características da imagem
-  caracteristicas = []
-  if result.tags and "values" in result.tags:
-      for tag in result.tags["values"]:
-          tag_pt = traduzir_texto(tag["name"])
-          caracteristicas.append({"nome": tag_pt, "confianca": f"{tag['confidence'] * 100:.2f}%"})
-    
-  # Processar objetos detectados
-  objetos = []
-  if result.objects and "values" in result.objects:
-      for obj in result.objects["values"]:
-          for tag in obj["tags"]:
-              obj_pt = traduzir_texto(tag["name"])
-              objetos.append({"nome": obj_pt, "confianca": f"{tag['confidence'] * 100:.2f}%"})
-  
   return {
-      "imagem_url": imagem_url,
-      "caracteristicas": caracteristicas,
-      "objetos": objetos}
+            "imagem_url": imagem_gerada
+        }
+
+
+# async def analisar_imagem(imagem_url):
+#     computer_vision_endpoint = os.getenv("COMPUTER_VISION_ENDPOINT")
+#     computer_vision_key = os.getenv("COMPUTER_VISION_KEY")
+#     caracteristicas = []
+#     objetos = []
+
+#     analyze_url = computer_vision_endpoint + "/vision/v3.2/analyze"
+
+#     # Baixa a imagem via GET
+#     image_data = requests.get(imagem_url).content
+
+#     headers = {"Ocp-Apim-Subscription-Key": computer_vision_key, "Content-Type": "application/octet-stream"}
+#     params = {"visualFeatures": "Tags,Objects"}
+        
+#     response = requests.post(analyze_url, headers=headers, params=params, data=image_data)
+#     response.raise_for_status()
+#     analysis = response.json()
+        
+#     for tag in analysis.get("tags", []):
+#         tag_pt = traduzir_texto(tag["name"])
+#         caracteristicas.append({"nome": tag_pt, "confianca": f"{tag['confidence'] * 100:.2f}%"})
+        
+#     for obj in analysis.get("objects", []):
+#         obj_pt = traduzir_texto(obj["object"])
+#         objetos.append({
+#             "nome": obj_pt,
+#             "confianca": f"{obj['confidence'] * 100:.2f}%"
+#         })
+
+#     return {
+#         "imagem_url": imagem_url,
+#         "caracteristicas": caracteristicas,
+#         "objetos": objetos
+#     }
